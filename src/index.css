@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+@theme {
+  --color-neon-green: #39ff14;
+  --color-neon-green-dim: rgba(57, 255, 20, 0.15);
+  --color-bg-dark: #121212;
+  --color-bg-card: #1e1e1e;
+  --color-border-color: #333333;
+
+  /* IRONFORGE BRAND COLORS */
+  --color-brand-black: #0a0a0a;
+  --color-brand-red: #e11d48;
+  --color-brand-red-hover: #be123c;
+  --color-brand-red-dark: #9f1239;
+  --color-brand-orange: #f97316;
+  --color-brand-orange-hover: #ea580c;
+
+  /* SUTILES SOMBRAS OSCURAS (Zinc-900/800 base) */
+  --shadow-sm: 0 1px 2px 0 rgba(24, 24, 27, 0.8);
+  --shadow-DEFAULT: 0 1px 3px 0 rgba(24, 24, 27, 0.8), 0 1px 2px -1px rgba(24, 24, 27, 0.6);
+  --shadow-md: 0 4px 6px -1px rgba(24, 24, 27, 0.8), 0 2px 4px -2px rgba(24, 24, 27, 0.6);
+  --shadow-lg: 0 10px 15px -3px rgba(24, 24, 27, 0.8), 0 4px 6px -4px rgba(24, 24, 27, 0.6);
+  --shadow-xl: 0 20px 25px -5px rgba(24, 24, 27, 0.8), 0 8px 10px -6px rgba(24, 24, 27, 0.6);
+  --shadow-2xl: 0 25px 50px -12px rgba(24, 24, 27, 1);
+
+  /* TYPOGRAPHY */
+  --font-bebas: "Bebas Neue", sans-serif;
+  --font-urbanist: "Urbanist", sans-serif;
+  --font-mono: "Azeret Mono", monospace;
+}
+
+@layer base {
+  body {
+    @apply bg-[var(--color-bg-dark)] text-white font-urbanist antialiased;
+  }
+}
+
+@utility glow-transition {
+  transition: filter 300ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* RUIDO ESTÁTICO (TEXTURA INDUSTRIAL) */
+body, .bg-noise {
+  position: relative;
+}
+body::before, .bg-noise::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.04;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Custom Scrollbar for a premium look */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg-dark); 
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-color); 
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+}

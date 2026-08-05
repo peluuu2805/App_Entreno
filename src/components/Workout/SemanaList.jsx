@@ -23,7 +23,7 @@ export default function SemanaList({ semanas, setSemanas }) {
         .from('dias')
         .select('*, series(*)')
         .eq('semana_id', semanaId)
-        .order('orden', { ascending: true })
+        .order('id', { ascending: false })
         .order('num_serie', { referencedTable: 'series', ascending: true });
 
       if (!error && data) {
@@ -55,7 +55,7 @@ export default function SemanaList({ semanas, setSemanas }) {
       data.series = [];
       setDiasMap(prev => ({
         ...prev,
-        [semanaId]: [...(prev[semanaId] || []), data]
+        [semanaId]: [data, ...(prev[semanaId] || [])]
       }));
     } else {
       alert('Error: Ya existe un día con ese nombre en esta semana o hubo un fallo.');

@@ -753,7 +753,7 @@ function SemanaCard({ semana, onInspect, refreshData }) {
       <div className="flex-1 space-y-2 mb-8 relative z-10">
         <p className="text-[10px] text-zinc-500 font-bold tracking-widest uppercase mb-3">MÓDULOS DE ESTA SEMANA:</p>
         <div className="flex flex-wrap gap-2">
-          {semana.dias?.map(dia => (
+          {semana.dias?.slice().sort((a, b) => b.id - a.id).map(dia => (
             <span key={dia.id} className="text-xs bg-zinc-900/80 text-zinc-300 font-bold uppercase tracking-wider px-3 py-1.5 border border-zinc-800/50 rounded-lg shadow-sm">
               {dia.nombre}
             </span>
@@ -804,7 +804,8 @@ export default function CalendarBlocks() {
     const { data, error } = await supabase
       .from('semanas')
       .select('*, dias(*, series(*, ejercicios(nombre, notas)))')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .order('id', { referencedTable: 'dias', ascending: false });
     
     if (error) {
       toast.error('ERROR AL CARGAR DATOS: ' + error.message);
@@ -954,7 +955,7 @@ export default function CalendarBlocks() {
             </div>
 
             <div ref={daysParent} className="space-y-6 pb-32">
-              {activeWeek.dias?.sort((a, b) => a.id - b.id).map(dia => (
+              {activeWeek.dias?.slice().sort((a, b) => b.id - a.id).map(dia => (
                 <DiaItem 
                   key={dia.id} 
                   dia={dia} 
@@ -985,5 +986,3 @@ export default function CalendarBlocks() {
     </>
   );
 }
-
-

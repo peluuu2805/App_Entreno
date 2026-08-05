@@ -96,7 +96,8 @@ export default function AIChat() {
           .select('*, dias(*, series(*, ejercicios(nombre)))')
           .eq('user_id', user.id)
           .gte('created_at', thirtyDaysAgo.toISOString())
-          .order('created_at', { ascending: false }),
+          .order('created_at', { ascending: false })
+          .order('id', { referencedTable: 'dias', ascending: false }),
         supabase
           .from('medidas')
           .select('*')
@@ -378,4 +379,3 @@ export default function AIChat() {
     </div>
   );
 }
-

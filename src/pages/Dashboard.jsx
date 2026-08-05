@@ -306,6 +306,7 @@ export default function Dashboard() {
           .select('*, dias(*, series(*))')
           .eq('user_id', user.id)
           .order('id', { ascending: false })
+          .order('id', { referencedTable: 'dias', ascending: false })
           .limit(1);
 
         let vol = 0;
@@ -794,3 +795,4 @@ Dale un ÚNICO y cortísimo consejo (máximo 15 palabras) agresivo y motivador s
     </div>
   );
 }
+

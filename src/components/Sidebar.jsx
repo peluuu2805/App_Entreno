@@ -24,7 +24,7 @@ export default function Sidebar() {
 
   return (
     <>
-      <aside className="w-64 bg-zinc-950/80 backdrop-blur-xl border-r border-zinc-800/50 h-screen flex flex-col hidden md:flex shrink-0 relative z-20">
+      <aside className="w-64 bg-black/40 backdrop-blur-xl border-r border-white/5 h-screen flex flex-col hidden md:flex shrink-0 relative z-20">
         {/* Brand */}
         <div className="h-20 flex items-center px-6 border-b border-zinc-900 shrink-0">
           <div className="flex items-center gap-3">
@@ -42,27 +42,28 @@ export default function Sidebar() {
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`relative flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs tracking-widest transition-colors duration-300 uppercase shrink-0 ${
-                  isActive 
-                    ? 'text-white' 
-                    : 'text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900/50'
-              }`}
-            >
-              {isActive && (
-                <motion.div
-                  layoutId="activeSidebar"
-                  className="absolute inset-0 bg-brand-red/15 border border-brand-red/40 rounded-xl shadow-[0_0_15px_rgba(225,29,72,0.2)] z-0"
-                  transition={{ type: "spring", stiffness: 350, damping: 30 }}
-                />
-              )}
-              <div className="relative z-10 flex items-center gap-3">
-                <item.icon size={18} strokeWidth={2.5} className={isActive ? 'text-brand-red drop-shadow-[0_0_8px_rgba(225,29,72,0.8)]' : ''} />
-                {item.label}
-              </div>
-            </Link>
+              <motion.div key={item.path} whileTap={{ scale: 0.95 }}>
+                <Link
+                  to={item.path}
+                  className={`relative flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs tracking-widest transition-colors duration-300 uppercase shrink-0 ${
+                      isActive 
+                        ? 'text-white' 
+                        : 'text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900/50'
+                  }`}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeSidebar"
+                      className="absolute inset-0 bg-brand-red/15 border border-brand-red/40 rounded-xl shadow-[0_0_15px_rgba(225,29,72,0.2)] z-0"
+                      transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                    />
+                  )}
+                  <div className="relative z-10 flex items-center gap-3">
+                    <item.icon size={18} strokeWidth={2.5} className={isActive ? 'text-brand-red drop-shadow-[0_0_8px_rgba(225,29,72,0.8)]' : ''} />
+                    {item.label}
+                  </div>
+                </Link>
+              </motion.div>
           )})}
         </nav>
 

@@ -25,7 +25,7 @@ export default function MainLayout() {
       <div className="flex-1 flex flex-col h-screen overflow-y-auto relative z-10">
         
         {/* Mobile Header (Hidden on Desktop) */}
-        <header className="md:hidden flex items-center justify-between p-4 border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-xl shrink-0 relative z-20">
+        <header className="md:hidden flex items-center justify-between p-4 border-b border-white/5 bg-black/40 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.5)] shrink-0 relative z-20">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-brand-red flex items-center justify-center rounded-sm">
               <Activity className="text-zinc-950" size={18} strokeWidth={3} />
@@ -71,34 +71,48 @@ export default function MainLayout() {
                 </button>
               </div>
               <div className="flex flex-col p-6 gap-4 font-bebas text-3xl tracking-widest overflow-y-auto custom-scrollbar h-full pb-20">
-                <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-4 text-zinc-300 hover:text-brand-red py-4 border-b border-zinc-900/50">
-                  <Radar size={28} className="text-brand-red" />
-                  DASHBOARD
-                </Link>
-                <Link to="/blocks" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-4 text-zinc-300 hover:text-brand-red py-4 border-b border-zinc-900/50">
-                  <LayoutGrid size={28} className="text-brand-red" />
-                  BLOQUES
-                </Link>
-                <Link to="/progression" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-4 text-zinc-300 hover:text-brand-red py-4 border-b border-zinc-900/50">
-                  <TrendingUp size={28} className="text-brand-red" />
-                  PROGRESIÓN
-                </Link>
-                <Link to="/measurements" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-4 text-zinc-300 hover:text-brand-red py-4 border-b border-zinc-900/50">
-                  <Scale size={28} className="text-brand-red" />
-                  MEDIDAS
-                </Link>
-                <Link to="/nutrition" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-4 text-zinc-300 hover:text-brand-red py-4 border-b border-zinc-900/50">
-                  <Apple size={28} className="text-brand-red" />
-                  NUTRICIÓN
-                </Link>
-                <Link to="/console" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-4 text-zinc-300 hover:text-brand-red py-4 border-b border-zinc-900/50">
-                  <Terminal size={28} className="text-brand-red" />
-                  IA
-                </Link>
-                <Link to="/settings" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-4 text-zinc-300 hover:text-brand-red py-4 border-b border-zinc-900/50">
-                  <Settings size={28} className="text-brand-red" />
-                  AJUSTES
-                </Link>
+                <motion.div whileTap={{ scale: 0.95 }}>
+                  <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-4 text-zinc-300 hover:text-brand-red py-4 border-b border-zinc-900/50">
+                    <Radar size={28} className="text-brand-red" />
+                    DASHBOARD
+                  </Link>
+                </motion.div>
+                <motion.div whileTap={{ scale: 0.95 }}>
+                  <Link to="/blocks" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-4 text-zinc-300 hover:text-brand-red py-4 border-b border-zinc-900/50">
+                    <LayoutGrid size={28} className="text-brand-red" />
+                    BLOQUES
+                  </Link>
+                </motion.div>
+                <motion.div whileTap={{ scale: 0.95 }}>
+                  <Link to="/progression" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-4 text-zinc-300 hover:text-brand-red py-4 border-b border-zinc-900/50">
+                    <TrendingUp size={28} className="text-brand-red" />
+                    PROGRESIÓN
+                  </Link>
+                </motion.div>
+                <motion.div whileTap={{ scale: 0.95 }}>
+                  <Link to="/measurements" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-4 text-zinc-300 hover:text-brand-red py-4 border-b border-zinc-900/50">
+                    <Scale size={28} className="text-brand-red" />
+                    MEDIDAS
+                  </Link>
+                </motion.div>
+                <motion.div whileTap={{ scale: 0.95 }}>
+                  <Link to="/nutrition" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-4 text-zinc-300 hover:text-brand-red py-4 border-b border-zinc-900/50">
+                    <Apple size={28} className="text-brand-red" />
+                    NUTRICIÓN
+                  </Link>
+                </motion.div>
+                <motion.div whileTap={{ scale: 0.95 }}>
+                  <Link to="/console" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-4 text-zinc-300 hover:text-brand-red py-4 border-b border-zinc-900/50">
+                    <Terminal size={28} className="text-brand-red" />
+                    IA
+                  </Link>
+                </motion.div>
+                <motion.div whileTap={{ scale: 0.95 }}>
+                  <Link to="/settings" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-4 text-zinc-300 hover:text-brand-red py-4 border-b border-zinc-900/50">
+                    <Settings size={28} className="text-brand-red" />
+                    AJUSTES
+                  </Link>
+                </motion.div>
               </div>
             </motion.div>
           )}
@@ -109,10 +123,10 @@ export default function MainLayout() {
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
+              initial={{ opacity: 0, y: 15, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -15, scale: 0.98 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
               className="max-w-7xl mx-auto h-full"
             >
               <Outlet />

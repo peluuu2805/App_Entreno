@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
 import { AI_PERSONA_LABELS } from '../lib/constants';
 import { motion, AnimatePresence } from 'framer-motion';
+import { exercisesService } from '../services/exercisesService';
 
 export default function Settings() {
   const { user } = useAuth();
@@ -148,7 +149,7 @@ export default function Settings() {
 
   const fetchEjercicios = async () => {
     if (!user) return;
-    const { data } = await supabase.from('ejercicios').select('*').order('nombre');
+    const { data } = await exercisesService.getAll();
     if (data) setEjercicios(data);
   };
 
@@ -199,7 +200,7 @@ export default function Settings() {
       setEditingId(null);
       return;
     }
-    const { error } = await supabase.from('ejercicios').update({ nombre: editName.toUpperCase() }).eq('id', id);
+    const { error } = await exercisesService.updateName(id, editName);
     if (error) {
       toast.error('ERROR AL ACTUALIZAR: ' + error.message);
     } else {
@@ -210,7 +211,7 @@ export default function Settings() {
   };
 
   const handleDelete = async (ej) => {
-    const { error } = await supabase.from('ejercicios').delete().eq('id', ej.id);
+    const { error } = await exercisesService.delete(ej.id);
     if (error) {
       toast.error('ERROR AL ELIMINAR: Puede que esté en uso en tus entrenamientos.');
     } else {

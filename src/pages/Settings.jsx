@@ -1,14 +1,16 @@
-import { ShieldAlert, Database, Edit2, Check, X, Cpu, Lock, Trophy, Flame, Zap, Target, Crown, Apple, Ruler, Loader2 } from 'lucide-react';
+import { ShieldAlert, Database, Edit2, Trash2, Check, X, Cpu, Lock, Trophy, Flame, Zap, Target, Crown, Apple, Ruler, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
 import { AI_PERSONA_LABELS } from '../lib/constants';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Settings() {
   const { user } = useAuth();
   const [ejercicios, setEjercicios] = useState([]);
   const [editingId, setEditingId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
   const [editName, setEditName] = useState("");
   const [aiPersona, setAiPersona] = useState('biomecanic');
   const [rachaActual, setRachaActual] = useState(0);
@@ -207,6 +209,17 @@ export default function Settings() {
     setEditingId(null);
   };
 
+  const handleDelete = async (ej) => {
+    const { error } = await supabase.from('ejercicios').delete().eq('id', ej.id);
+    if (error) {
+      toast.error('ERROR AL ELIMINAR: Puede que esté en uso en tus entrenamientos.');
+    } else {
+      toast.success('Ejercicio eliminado exitosamente');
+      fetchEjercicios();
+    }
+    setDeletingId(null);
+  };
+
   const startEditing = (ej) => {
     setEditingId(ej.id);
     setEditName(ej.nombre);
@@ -393,35 +406,87 @@ export default function Settings() {
               <p className="text-[10px] text-zinc-600 font-bold tracking-widest uppercase">No hay ejercicios registrados.</p>
             )}
             {ejercicios.map(ej => (
-              <div key={ej.id} className="bg-zinc-950 border border-zinc-900 p-3 rounded-xl flex justify-between items-center group hover:border-zinc-700 transition-colors">
-                {editingId === ej.id ? (
-                  <div className="flex-1 flex gap-2 mr-2">
-                    <input 
-                      type="text"
-                      className="flex-1 bg-zinc-950 border border-brand-red/50 text-xs text-zinc-100 p-2 rounded-sm focus:outline-none uppercase"
-                      value={editName}
-                      onChange={e => setEditName(e.target.value)}
-                      onKeyDown={e => handleKeyDown(e, ej.id)}
-                      autoFocus
-                    />
-                    <button onClick={() => handleUpdate(ej.id)} className="bg-brand-red hover:bg-[#be123c] text-zinc-950 p-2 rounded-sm transition-colors">
-                      <Check size={14} />
-                    </button>
-                    <button onClick={() => setEditingId(null)} className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 p-2 rounded-sm transition-colors">
-                      <X size={14} />
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <span className="text-xs font-bold text-zinc-300 uppercase tracking-wider">{ej.nombre}</span>
-                    <button 
-                      onClick={() => startEditing(ej)}
-                      className="opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-brand-red transition-all p-1"
+              <div key={ej.id} className={`bg-zinc-950 border border-zinc-900 rounded-xl flex flex-col relative group hover:border-zinc-700 transition-all overflow-hidden ${deletingId === ej.id ? 'p-0' : 'p-3'}`}>
+                <AnimatePresence mode="wait">
+                  {deletingId === ej.id ? (
+                    <motion.div 
+                      key="delete"
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      className="flex flex-col items-center justify-center p-4 w-full relative bg-[#0a0a0a] border-red-900/50"
                     >
-                      <Edit2 size={14} />
-                    </button>
-                  </>
-                )}
+                      <div className="absolute -right-4 -top-4 text-red-900/20 rotate-12 pointer-events-none">
+                        <Trash2 size={80} strokeWidth={1} />
+                      </div>
+                      <div className="relative z-10 text-center w-full">
+                        <div className="inline-flex bg-red-900/20 p-2 rounded-full border border-red-900/30 text-red-500 mb-2">
+                          <Trash2 size={20} />
+                        </div>
+                        <h3 className="text-sm font-black text-zinc-100 uppercase tracking-tighter mb-4">¿ELIMINAR EJERCICIO?</h3>
+                        <div className="flex gap-2 w-full">
+                          <button 
+                            onClick={() => setDeletingId(null)}
+                            className="flex-1 py-2 text-zinc-400 font-black text-[10px] tracking-widest uppercase hover:bg-zinc-900 rounded-lg transition-colors border border-transparent hover:border-zinc-800"
+                          >
+                            Cancelar
+                          </button>
+                          <button 
+                            onClick={() => handleDelete(ej)}
+                            className="flex-[1.5] bg-red-600 hover:bg-red-500 text-white font-black text-[10px] tracking-widest uppercase py-2 rounded-lg transition-all shadow-[0_0_10px_rgba(220,38,38,0.2)] hover:shadow-[0_0_15px_rgba(220,38,38,0.4)]"
+                          >
+                            Destruir
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="content"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="w-full flex justify-between items-center"
+                    >
+                      {editingId === ej.id ? (
+                        <div className="flex-1 flex gap-2 mr-2">
+                          <input 
+                            type="text"
+                            className="flex-1 bg-zinc-950 border border-brand-red/50 text-xs text-zinc-100 p-2 rounded-sm focus:outline-none uppercase"
+                            value={editName}
+                            onChange={e => setEditName(e.target.value)}
+                            onKeyDown={e => handleKeyDown(e, ej.id)}
+                            autoFocus
+                          />
+                          <button onClick={() => handleUpdate(ej.id)} className="bg-brand-red hover:bg-[#be123c] text-zinc-950 p-2 rounded-sm transition-colors">
+                            <Check size={14} />
+                          </button>
+                          <button onClick={() => setEditingId(null)} className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 p-2 rounded-sm transition-colors">
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <span className="text-xs font-bold text-zinc-300 uppercase tracking-wider">{ej.nombre}</span>
+                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                            <button 
+                              onClick={() => startEditing(ej)}
+                              className="text-zinc-500 hover:text-[var(--color-neon-green)] p-1 transition-colors"
+                            >
+                              <Edit2 size={14} />
+                            </button>
+                            <button 
+                              onClick={() => setDeletingId(ej.id)}
+                              className="text-zinc-500 hover:text-red-500 p-1 transition-colors"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             ))}
           </div>

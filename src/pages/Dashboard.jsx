@@ -385,14 +385,17 @@ export default function Dashboard() {
         return;
       }
 
-      const groq = new Groq({ apiKey: settings.gemini_api_key, dangerouslyAllowBrowser: true });
+      const groq = new Groq({ 
+        apiKey: settings.gemini_api_key, 
+        dangerouslyAllowBrowser: true
+      });
       
       const prompt = `Eres IronForge IA, un asistente táctico y militar brutalista. El atleta ha consumido ${Math.round(nutritionData.totalCals)}/${nutritionData.metaCals} kcal hoy. Macros consumidos: P: ${Math.round(nutritionData.totalP)}/${nutritionData.metaMac.p}g, C: ${Math.round(nutritionData.totalC)}/${nutritionData.metaMac.c}g, G: ${Math.round(nutritionData.totalG)}/${nutritionData.metaMac.g}g.
 Dale un ÚNICO y cortísimo consejo (máximo 15 palabras) agresivo y motivador sobre qué debe hacer (ej. prioriza proteína, frena carbos, etc.). No uses emojis. Usa formato mayúsculas.`;
 
       const completion = await groq.chat.completions.create({
         messages: [{ role: 'user', content: prompt }],
-        model: 'llama-3.3-70b-versatile',
+        model: 'openai/gpt-oss-120b',
       });
 
       let text = completion.choices[0]?.message?.content || 'SISTEMA OPERATIVO ÓPTIMO.';

@@ -135,18 +135,59 @@ function SerieRow({ serie, index, refreshData, ghostData }) {
   };
 
   return (
-    <div className="bg-zinc-900/30 border border-zinc-800/50 p-3 rounded-xl flex flex-col relative group hover:border-zinc-600/50 hover:bg-zinc-900/50 transition-all w-full overflow-hidden">
-      <div className="flex justify-between items-start mb-2">
-        <div className="flex items-center gap-2">
-          <span className="text-zinc-600 font-black text-xs">S{index + 1}</span>
-        </div>
-        <button 
-          onClick={(e) => { e.stopPropagation(); setDeleteModalOpen(true); }}
-          className="p-1.5 px-3 bg-zinc-900/80 rounded-sm text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-red-500 hover:bg-red-500/10 transition-colors opacity-100 sm:opacity-0 group-hover:opacity-100 touch-manipulation"
-        >
-          Eliminar
-        </button>
-      </div>
+    <div className={`bg-zinc-900/30 border border-zinc-800/50 rounded-xl flex flex-col relative group hover:border-zinc-600/50 hover:bg-zinc-900/50 transition-all w-full overflow-hidden ${deleteModalOpen ? 'p-0' : 'p-3'}`}>
+      <AnimatePresence mode="wait">
+        {deleteModalOpen ? (
+          <motion.div 
+            key="delete"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="flex flex-col items-center justify-center p-4 w-full relative bg-[#0a0a0a] rounded-xl border border-red-900/50"
+          >
+            <div className="absolute -right-4 -top-4 text-red-900/20 rotate-12 pointer-events-none">
+              <Trash2 size={80} strokeWidth={1} />
+            </div>
+            <div className="relative z-10 text-center w-full">
+              <div className="inline-flex bg-red-900/20 p-2 rounded-full border border-red-900/30 text-red-500 mb-2">
+                <Trash2 size={20} />
+              </div>
+              <h3 className="text-sm font-black text-zinc-100 uppercase tracking-tighter mb-4">¿ELIMINAR SERIE?</h3>
+              <div className="flex gap-2 w-full">
+                <button 
+                  onClick={(e) => { e.stopPropagation(); setDeleteModalOpen(false); }}
+                  className="flex-1 py-2 text-zinc-400 font-black text-[10px] tracking-widest uppercase hover:bg-zinc-900 rounded-lg transition-colors border border-transparent hover:border-zinc-800"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  onClick={handleDelete}
+                  className="flex-[1.5] bg-red-600 hover:bg-red-500 text-white font-black text-[10px] tracking-widest uppercase py-2 rounded-lg transition-all shadow-[0_0_10px_rgba(220,38,38,0.2)] hover:shadow-[0_0_15px_rgba(220,38,38,0.4)]"
+                >
+                  Destruir
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="content"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="w-full flex flex-col"
+          >
+            <div className="flex justify-between items-start mb-2">
+              <div className="flex items-center gap-2">
+                <span className="text-zinc-600 font-black text-xs">S{index + 1}</span>
+              </div>
+              <button 
+                onClick={(e) => { e.stopPropagation(); setDeleteModalOpen(true); }}
+                className="p-1.5 px-3 bg-zinc-900/80 rounded-sm text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-red-500 hover:bg-red-500/10 transition-colors opacity-100 sm:opacity-0 group-hover:opacity-100 touch-manipulation"
+              >
+                Eliminar
+              </button>
+            </div>
 
       {isEditing ? (
         <div 
@@ -219,14 +260,9 @@ function SerieRow({ serie, index, refreshData, ghostData }) {
           </div>
         </div>
       )}
-
-      <ConfirmModal 
-        isOpen={deleteModalOpen}
-        onClose={() => setDeleteModalOpen(false)}
-        onConfirm={handleDelete}
-        title="¿ELIMINAR SERIE?"
-        message="Esta acción es irreversible."
-      />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

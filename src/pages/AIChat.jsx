@@ -84,31 +84,31 @@ export default function AIChat() {
 
   const fetchUserTelemetry = async () => {
     try {
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const fourteenDaysAgo = new Date();
+      fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
 
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      const threeDaysAgo = new Date();
+      threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
 
       const [workoutsResponse, medidasResponse, nutricionResponse] = await Promise.all([
         supabase
           .from('semanas')
           .select('*, dias(*, series(*, ejercicios(nombre)))')
           .eq('user_id', user.id)
-          .gte('created_at', thirtyDaysAgo.toISOString())
+          .gte('created_at', fourteenDaysAgo.toISOString())
           .order('created_at', { ascending: false })
           .order('id', { referencedTable: 'dias', ascending: false }),
         supabase
           .from('medidas')
           .select('*')
           .eq('user_id', user.id)
-          .gte('created_at', thirtyDaysAgo.toISOString())
+          .gte('created_at', fourteenDaysAgo.toISOString())
           .order('created_at', { ascending: false }),
         supabase
           .from('registros_alimentos')
           .select('*')
           .eq('user_id', user.id)
-          .gte('fecha', sevenDaysAgo.toISOString().split('T')[0])
+          .gte('fecha', threeDaysAgo.toISOString().split('T')[0])
           .order('fecha', { ascending: false })
       ]);
 
@@ -120,18 +120,10 @@ export default function AIChat() {
       if (medidas.length > 0) {
         medidas.forEach(m => {
           const date = m.created_at ? m.created_at.split('T')[0] : 'N/A';
-          let parts = [`Fecha: ${date}`];
-          if (m.peso) parts.push(`Peso: ${m.peso}kg`);
-          if (m.altura) parts.push(`Altura: ${m.altura}cm`);
-          if (m.cintura) parts.push(`Cintura: ${m.cintura}cm`);
-          if (m.pecho) parts.push(`Pecho: ${m.pecho}cm`);
-          if (m.brazo) parts.push(`Brazo: ${m.brazo}cm`);
-          if (m.pierna) parts.push(`Pierna: ${m.pierna}cm`);
-          if (m.notas) parts.push(`Notas: ${m.notas}`);
-          recentMeasurementsString += `[BIOMETRÍA RECIENTE]: ${parts.join(' | ')}\n`;
+          recentMeasurementsString += `[BIO ${date}]: Peso:${m.peso}kg ${m.notas ? `Notas:${m.notas}`:''}\n`;
         });
       } else {
-        recentMeasurementsString += "[BIOMETRÍA RECIENTE]: No hay registros biométricos recientes.\n";
+        recentMeasurementsString += "[BIO]: Sin registros.\n";
       }
 
       let recentNutritionString = "";
@@ -139,50 +131,61 @@ export default function AIChat() {
         const agrupado = {};
         nutricion.forEach(n => {
           if (!agrupado[n.fecha]) {
-            agrupado[n.fecha] = { calorias: 0, proteinas: 0, carbohidratos: 0, grasas: 0, desglose: {} };
+            agrupado[n.fecha] = { cal: 0, pro: 0, car: 0, gra: 0 };
           }
-          const dt = agrupado[n.fecha];
-          dt.calorias += Number(n.calorias || 0);
-          dt.proteinas += Number(n.proteinas || 0);
-          dt.carbohidratos += Number(n.carbohidratos || 0);
-          dt.grasas += Number(n.grasas || 0);
-          
-          if (!dt.desglose[n.tipo_comida]) dt.desglose[n.tipo_comida] = [];
-          dt.desglose[n.tipo_comida].push(n.nombre_alimento);
+          agrupado[n.fecha].cal += Number(n.calorias || 0);
+          agrupado[n.fecha].pro += Number(n.proteinas || 0);
+          agrupado[n.fecha].car += Number(n.carbohidratos || 0);
+          agrupado[n.fecha].gra += Number(n.grasas || 0);
         });
 
         Object.keys(agrupado).sort().reverse().forEach(fecha => {
           const dt = agrupado[fecha];
-          recentNutritionString += `[NUTRICIÓN - ${fecha}]: ${Math.round(dt.calorias)} kcal | Proteínas: ${Math.round(dt.proteinas)}g | Carbohidratos: ${Math.round(dt.carbohidratos)}g | Grasas: ${Math.round(dt.grasas)}g.\n`;
+          recentNutritionString += `[NUT ${fecha}]: ${Math.round(dt.cal)}kcal, ${Math.round(dt.pro)}p, ${Math.round(dt.car)}c, ${Math.round(dt.gra)}g.\n`;
         });
       } else {
-        recentNutritionString += "[NUTRICIÓN]: No hay registros en los últimos 7 días.\n";
+        recentNutritionString += "[NUT]: Sin registros recientes.\n";
       }
 
       let recentWorkoutsString = "";
       if (semanas.length > 0) {
+        const entrenosPorDia = {};
         semanas.forEach(sem => {
           sem.dias?.forEach(dia => {
             const date = dia.created_at ? dia.created_at.split('T')[0] : sem.created_at ? sem.created_at.split('T')[0] : 'N/A';
+            if (!entrenosPorDia[date]) entrenosPorDia[date] = {};
+            
             const sortedSeries = dia.series ? [...dia.series].sort((a,b) => a.orden - b.orden || a.id - b.id) : [];
             sortedSeries.forEach(s => {
               const ejName = s.ejercicios?.nombre || s.ejercicio || 'Desconocido';
-              let parts = [`Fecha: ${date}`, `${ejName}: ${s.peso}kg x ${s.repeticiones}`];
-              if (s.rir != null) parts.push(`RIR: ${s.rir}`);
-              if (s.notas) parts.push(`Notas: ${s.notas}`);
-              recentWorkoutsString += `[ENTRENAMIENTOS RECIENTES]: ${parts.join(' | ')}\n`;
+              if (!entrenosPorDia[date][ejName]) entrenosPorDia[date][ejName] = [];
+              entrenosPorDia[date][ejName].push(`${s.peso}x${s.repeticiones}${s.rir != null ? `(R${s.rir})`:''}`);
             });
           });
         });
-        if (recentWorkoutsString === "") recentWorkoutsString = "[ENTRENAMIENTOS RECIENTES]: No hay entrenamientos recientes.\n";
+
+        Object.keys(entrenosPorDia).sort().reverse().forEach(date => {
+          const ejs = entrenosPorDia[date];
+          if (Object.keys(ejs).length > 0) {
+            let diaStr = `[ENT ${date}] `;
+            const parts = [];
+            Object.keys(ejs).forEach(ej => {
+              parts.push(`${ej}: ${ejs[ej].join(', ')}`);
+            });
+            diaStr += parts.join(' | ') + '\n';
+            recentWorkoutsString += diaStr;
+          }
+        });
+        
+        if (recentWorkoutsString === "") recentWorkoutsString = "[ENT]: Sin registros.\n";
       } else {
-        recentWorkoutsString += "[ENTRENAMIENTOS RECIENTES]: No hay entrenamientos recientes.\n";
+        recentWorkoutsString += "[ENT]: Sin registros.\n";
       }
 
-      return `${recentMeasurementsString}\n${recentNutritionString}\n${recentWorkoutsString}`;
+      return `${recentMeasurementsString}${recentNutritionString}${recentWorkoutsString}`;
     } catch (err) {
       console.error("Error fetching telemetry:", err);
-      return "[SISTEMA]: Error al recopilar telemetría.";
+      return "[SISTEMA]: Error de telemetría.";
     }
   };
 
@@ -202,7 +205,10 @@ export default function AIChat() {
     try {
       const telemetryString = await fetchUserTelemetry();
 
-      const groq = new Groq({ apiKey: apiKey, dangerouslyAllowBrowser: true });
+      const groq = new Groq({ 
+        apiKey: apiKey, 
+        dangerouslyAllowBrowser: true
+      });
       const personaText = AI_PERSONAS[aiPersona] || AI_PERSONAS['biomecanic'];
 
       const systemPrompt = `${personaText}\n\n${telemetryString}\n\nTienes acceso a los macros diarios del atleta. Correlaciona su ingesta calórica y proteica con su nivel de fatiga y su progreso en el entrenamiento. Sé directo y matemático en tus recomendaciones nutricionales.\n\nAnaliza obligatoriamente las notas cualitativas del atleta. Usa estos datos reales para dar consejos precisos y matemáticos sobre su progresión.\n\nPor favor, responde a la consulta del usuario de acuerdo a tu personalidad y arquetipo. Usa formato Markdown, incluye tablas si es conveniente.`;
@@ -225,14 +231,23 @@ export default function AIChat() {
         
       chatHistory.push({ role: 'user', content: userMessage });
 
-      const completion = await groq.chat.completions.create({
+      const stream = await groq.chat.completions.create({
         messages: chatHistory,
-        model: 'llama-3.3-70b-versatile',
+        model: 'openai/gpt-oss-120b',
+        stream: true,
       });
 
-      const text = completion.choices[0]?.message?.content || 'SISTEMA: NO SE OBTUVO RESPUESTA';
+      let text = '';
+      setMessages(prev => [...prev, { role: 'system', text: '' }]);
 
-      setMessages(prev => [...prev, { role: 'system', text }]);
+      for await (const chunk of stream) {
+        text += chunk.choices[0]?.delta?.content || '';
+        setMessages(prev => {
+          const newMessages = [...prev];
+          newMessages[newMessages.length - 1] = { role: 'system', text };
+          return newMessages;
+        });
+      }
     } catch (error) {
       console.error(error);
       setMessages(prev => [...prev, { role: 'system', text: `ERROR DEL SISTEMA GROQ: ${error.message}` }]);
@@ -373,7 +388,7 @@ export default function AIChat() {
           </button>
         </form>
         <p className="text-center text-[10px] text-zinc-500 mt-2 tracking-wide font-mono uppercase">
-          IronForge Protocol // Llama 3.3 Engine
+          IronForge Protocol // Groq Engine
         </p>
       </div>
     </div>

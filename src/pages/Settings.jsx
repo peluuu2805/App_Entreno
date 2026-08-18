@@ -1,4 +1,4 @@
-import { ShieldAlert, Database, Edit2, Check, X, Cpu, Lock, Trophy, Flame, Zap, Target, Crown, Apple, Ruler } from 'lucide-react';
+import { ShieldAlert, Database, Edit2, Check, X, Cpu, Lock, Trophy, Flame, Zap, Target, Crown, Apple, Ruler, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
@@ -15,7 +15,8 @@ export default function Settings() {
   const [rachaNutricion, setRachaNutricion] = useState(0); 
   const [rachaMedidas, setRachaMedidas] = useState(0);
   const [logroDesbloqueado, setLogroDesbloqueado] = useState(null);
-
+  const [apiKey, setApiKey] = useState('');
+  const [isSavingApi, setIsSavingApi] = useState(false);
   // Sistema de Notificaciones de Desbloqueo
   useEffect(() => {
      // Evaluamos de inmediato si las rachas coinciden con algún hito de medalla
@@ -151,9 +152,12 @@ export default function Settings() {
 
   const fetchUserSettings = async () => {
     if (!user) return;
-    const { data } = await supabase.from('user_settings').select('ai_persona').eq('user_id', user.id).single();
+    const { data } = await supabase.from('user_settings').select('ai_persona, gemini_api_key').eq('user_id', user.id).single();
     if (data?.ai_persona) {
       setAiPersona(data.ai_persona);
+    }
+    if (data?.gemini_api_key) {
+      setApiKey(data.gemini_api_key);
     }
   };
 
@@ -170,6 +174,21 @@ export default function Settings() {
       toast.error('ERROR AL ACTUALIZAR IA: ' + error.message);
     } else {
       toast.success('PERSONALIDAD IA ACTUALIZADA');
+    }
+  };
+
+  const handleSaveApiKey = async () => {
+    if (!user) return;
+    setIsSavingApi(true);
+    try {
+      const { error } = await supabase.from('user_settings').update({ gemini_api_key: apiKey }).eq('user_id', user.id);
+      if (error) throw error;
+      toast.success('API Key de Groq guardada correctamente');
+    } catch (err) {
+      toast.error('Error al guardar la API Key');
+      console.error(err);
+    } finally {
+      setIsSavingApi(false);
     }
   };
 
@@ -326,13 +345,23 @@ export default function Settings() {
 
           <div className="space-y-6">
             <div className="flex flex-col gap-2">
-              <label className="text-[10px] font-bold tracking-widest text-zinc-500 uppercase">GEMINI API KEY</label>
-              <input 
-                type="password" 
-                className="w-full bg-black border border-zinc-800 rounded-sm px-4 py-3 text-sm focus:border-brand-red outline-none transition-colors text-zinc-300"
-                placeholder="************************"
-                disabled
-              />
+              <label className="text-[10px] font-bold tracking-widest text-zinc-500 uppercase">GROQ API KEY</label>
+              <div className="flex gap-2">
+                <input 
+                  type="password" 
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  className="flex-1 bg-black border border-zinc-800 rounded-sm px-4 py-3 text-sm focus:border-brand-red outline-none transition-colors text-zinc-300"
+                  placeholder="gsk_..."
+                />
+                <button 
+                  onClick={handleSaveApiKey}
+                  disabled={isSavingApi}
+                  className="bg-brand-red hover:bg-red-600 text-white px-4 rounded-sm transition-colors text-xs font-bold uppercase tracking-widest disabled:opacity-50 flex items-center justify-center min-w-[100px]"
+                >
+                  {isSavingApi ? <Loader2 size={16} className="animate-spin" /> : 'Guardar'}
+                </button>
+              </div>
             </div>
 
             <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-zinc-800">

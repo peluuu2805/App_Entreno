@@ -484,7 +484,10 @@ export default function Nutrition() {
           throw new Error('API Key de IA no configurada.');
         }
 
-        const groq = new Groq({ apiKey: keys.gemini, dangerouslyAllowBrowser: true });
+        const groq = new Groq({ 
+          apiKey: keys.gemini, 
+          dangerouslyAllowBrowser: true
+        });
         
         const completion = await groq.chat.completions.create({
           messages: [
@@ -497,7 +500,7 @@ export default function Nutrition() {
               content: cleanQuery
             }
           ],
-          model: "llama-3.3-70b-versatile",
+          model: "openai/gpt-oss-120b",
           temperature: 0.1,
           response_format: { type: "json_object" }
         });

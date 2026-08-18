@@ -467,8 +467,8 @@ export default function Settings() {
                         </div>
                       ) : (
                         <>
-                          <span className="text-xs font-bold text-zinc-300 uppercase tracking-wider">{ej.nombre}</span>
-                          <div className="flex gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all">
+                          <span className="text-xs font-bold text-zinc-300 uppercase tracking-wider flex-1 truncate mr-2">{ej.nombre}</span>
+                          <div className="flex gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all shrink-0">
                             <button 
                               onClick={() => startEditing(ej)}
                               className="text-zinc-500 hover:text-[var(--color-neon-green)] p-1 transition-colors"
